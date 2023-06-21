@@ -18,8 +18,12 @@ template<typename T>
 using vector = boost::numeric::ublas::scalar_vector<T>;
 
 template<Number T>
-struct curve : std::enable_shared_from_this<curve>
+struct curve : std::enable_shared_from_this<curve<T>>
 {
+  enum type {
+    circle, ellipse, helix
+  };
+
   curve(const curve&) = default;
   auto operator=(const curve&) -> curve& = default;
   curve(curve&&) noexcept = default;
@@ -28,6 +32,7 @@ struct curve : std::enable_shared_from_this<curve>
 
   virtual auto get_point(T t) -> point<T> = 0;
   virtual auto get_derivative(T t) -> vector<T> = 0;
+  virtual auto get_type() const noexcept -> type = 0;
 };
 
 template<Number T>
@@ -61,6 +66,10 @@ public:
     y *= m_radius;
 
     return vector<T>(x.derivative(1), y.derivative(1), 0);
+  }
+
+  auto get_type() const noexcept -> curve<T>::type {
+    return curve<T>::type::circle;
   }
 };
 
@@ -96,6 +105,10 @@ public:
     y *= m_y_radii;
 
     return vector<T>(x.derivative(1), y.derivative(1), 0);
+  }
+
+  auto get_type() const noexcept -> curve<T>::type {
+    return curve<T>::type::ellipse;
   }
 };
 
@@ -135,5 +148,9 @@ public:
     z *= m_step;
 
     return vector<T>(x.derivative(1), y.derivative(1), z.derivative(1));
+  }
+
+  auto get_type() const noexcept -> curve<T>::type {
+    return curve<T>::type::helix;
   }
 };
