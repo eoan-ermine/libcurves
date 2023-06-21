@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <memory>
 #include <type_traits>
 
 #include <boost/geometry.hpp>
@@ -17,7 +18,7 @@ template<typename T>
 using vector = boost::numeric::ublas::scalar_vector<T>;
 
 template<Number T>
-struct curve
+struct curve : std::enable_shared_from_this<curve>
 {
   curve(const curve&) = default;
   auto operator=(const curve&) -> curve& = default;
