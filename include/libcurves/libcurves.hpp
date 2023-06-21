@@ -20,8 +20,11 @@ using vector = boost::numeric::ublas::scalar_vector<T>;
 template<Number T>
 struct curve : std::enable_shared_from_this<curve<T>>
 {
-  enum type {
-    circle, ellipse, helix
+  enum type
+  {
+    circle,
+    ellipse,
+    helix
   };
 
   curve(const curve&) = default;
@@ -68,9 +71,12 @@ public:
     return vector<T>(x.derivative(1), y.derivative(1), 0);
   }
 
-  auto get_type() const noexcept -> curve<T>::type {
+  auto get_type() const noexcept -> curve<T>::type
+  {
     return curve<T>::type::circle;
   }
+
+  auto get_radius() const noexcept -> T { return m_radius; }
 };
 
 template<Number T>
@@ -107,9 +113,14 @@ public:
     return vector<T>(x.derivative(1), y.derivative(1), 0);
   }
 
-  auto get_type() const noexcept -> curve<T>::type {
+  auto get_type() const noexcept -> curve<T>::type
+  {
     return curve<T>::type::ellipse;
   }
+
+  auto get_x_radii() const noexcept -> T { return m_x_radii; }
+
+  auto get_y_radii() const noexcept -> T { return m_y_radii; }
 };
 
 template<Number T>
@@ -150,7 +161,12 @@ public:
     return vector<T>(x.derivative(1), y.derivative(1), z.derivative(1));
   }
 
-  auto get_type() const noexcept -> curve<T>::type {
+  auto get_type() const noexcept -> curve<T>::type
+  {
     return curve<T>::type::helix;
   }
+
+  auto get_radius() const noexcept -> T { return m_radius; }
+
+  auto get_step() const noexcept -> T { return m_step; }
 };
