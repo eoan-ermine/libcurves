@@ -31,8 +31,8 @@ target_include_directories(
 
 target_compile_features(libcurves_libcurves INTERFACE cxx_std_20)
 
-find_package(fmt REQUIRED)
-target_link_libraries(libcurves_libcurves INTERFACE fmt::fmt)
+find_package(Boost 1.82.0 REQUIRED COMPONENTS math)
+target_link_libraries(libcurves_libcurves INTERFACE Boost::math)
 
 # ---- Install rules ----
 
