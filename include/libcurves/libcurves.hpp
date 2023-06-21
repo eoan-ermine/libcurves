@@ -4,6 +4,8 @@
 
 #include <fmt/core.h>
 
+#include "curves.hpp"
+
 /**
  * @brief Return the name of this header-only library
  */
