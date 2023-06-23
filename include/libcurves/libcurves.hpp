@@ -35,6 +35,7 @@ struct curve : std::enable_shared_from_this<curve<T>>
 
   virtual auto get_point(T t) -> point<T> = 0;
   virtual auto get_derivative(T t) -> vector<T> = 0;
+  virtual auto get_radii_sum() const noexcept -> T = 0;
   virtual auto get_type() const noexcept -> type = 0;
 };
 
@@ -77,6 +78,8 @@ public:
   }
 
   auto get_radius() const noexcept -> T { return m_radius; }
+
+  auto get_radii_sum() const noexcept -> T { return m_radius; }
 };
 
 template<Number T>
@@ -121,6 +124,8 @@ public:
   auto get_x_radii() const noexcept -> T { return m_x_radii; }
 
   auto get_y_radii() const noexcept -> T { return m_y_radii; }
+
+  auto get_radii_sum() const noexcept -> T { return m_x_radii + m_y_radii; }
 };
 
 template<Number T>
@@ -169,4 +174,6 @@ public:
   auto get_radius() const noexcept -> T { return m_radius; }
 
   auto get_step() const noexcept -> T { return m_step; }
+
+  auto get_radii_sum() const noexcept -> T { return m_radius; }
 };
