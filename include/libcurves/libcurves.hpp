@@ -85,7 +85,7 @@ public:
     return make_vector<T>(x.derivative(1), y.derivative(1), 0);
   }
 
-  curve<T>::type get_type() const noexcept override
+  typename curve<T>::type get_type() const noexcept override
   {
     return curve<T>::type::circle;
   }
@@ -129,7 +129,7 @@ public:
     return make_vector<T>(x.derivative(1), y.derivative(1), 0);
   }
 
-  curve<T>::type get_type() const noexcept override
+  typename curve<T>::type get_type() const noexcept override
   {
     return curve<T>::type::ellipse;
   }
@@ -179,7 +179,7 @@ public:
     return make_vector<T>(x.derivative(1), y.derivative(1), z.derivative(1));
   }
 
-  curve<T>::type get_type() const noexcept override
+  typename curve<T>::type get_type() const noexcept override
   {
     return curve<T>::type::helix;
   }
