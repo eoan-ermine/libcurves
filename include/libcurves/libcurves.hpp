@@ -11,11 +11,23 @@
 template<class T>
 concept Number = std::is_integral_v<T> || std::is_floating_point_v<T>;
 
-template<typename T>
+template<Number T>
 using point = boost::geometry::model::d3::point_xyz<T>;
 
-template<typename T>
-using vector = boost::numeric::ublas::scalar_vector<T>;
+template<Number T>
+using vector = boost::numeric::ublas::vector<T>;
+
+template<Number T>
+auto make_vector(T x, T y, T z) -> vector<T>
+{
+  vector<T> res(3);
+
+  res(0) = x;
+  res(1) = y;
+  res(2) = z;
+
+  return res;
+}
 
 template<Number T>
 struct curve : std::enable_shared_from_this<curve<T>>
@@ -27,16 +39,17 @@ struct curve : std::enable_shared_from_this<curve<T>>
     helix
   };
 
+  curve() = default;
   curve(const curve&) = default;
   auto operator=(const curve&) -> curve& = default;
   curve(curve&&) noexcept = default;
   auto operator=(curve&&) noexcept -> curve& = default;
   virtual ~curve() = default;
 
-  virtual auto get_point(T t) -> point<T> = 0;
-  virtual auto get_derivative(T t) -> vector<T> = 0;
-  virtual auto get_radii_sum() const noexcept -> T = 0;
-  virtual auto get_type() const noexcept -> type = 0;
+  virtual point<T> get_point(T t) const noexcept = 0;
+  virtual vector<T> get_derivative(T t) const noexcept = 0;
+  virtual T get_radii_sum() const noexcept = 0;
+  virtual type get_type() const noexcept = 0;
 };
 
 template<Number T>
@@ -50,15 +63,15 @@ public:
   {
   }
 
-  auto get_point(T t) const noexcept -> point<T>
+  point<T> get_point(T t) const noexcept override
   {
     // x(t) = r cos(t)
     // y(t) = r sin(t)
 
-    return point<T>(m_radius * std::cos(t), m_radius * std::sin(t));
+    return point<T>(m_radius * std::cos(t), m_radius * std::sin(t), 0);
   }
 
-  auto get_derivative(T t) const noexcept -> vector<T>
+  vector<T> get_derivative(T t) const noexcept override
   {
     using namespace boost::math::differentiation;
 
@@ -69,17 +82,17 @@ public:
     auto y = sin(make_fvar<T, Order>(t));
     y *= m_radius;
 
-    return vector<T>(x.derivative(1), y.derivative(1), 0);
+    return make_vector<T>(x.derivative(1), y.derivative(1), 0);
   }
 
-  auto get_type() const noexcept -> curve<T>::type
+  curve<T>::type get_type() const noexcept override
   {
     return curve<T>::type::circle;
   }
 
-  auto get_radius() const noexcept -> T { return m_radius; }
+  T get_radius() const noexcept { return m_radius; }
 
-  auto get_radii_sum() const noexcept -> T { return m_radius; }
+  T get_radii_sum() const noexcept override { return m_radius; }
 };
 
 template<Number T>
@@ -94,15 +107,15 @@ public:
   {
   }
 
-  auto get_point(T t) const noexcept -> point<T>
+  point<T> get_point(T t) const noexcept override
   {
     // x(t) = a cos(t)
     // y(t) = b sin(t)
 
-    return point<T>(m_x_radii * std::cos(t), m_y_radii * std::sin(t));
+    return point<T>(m_x_radii * std::cos(t), m_y_radii * std::sin(t), 0);
   }
 
-  auto get_derivative(T t) const noexcept -> vector<T>
+  vector<T> get_derivative(T t) const noexcept override
   {
     using namespace boost::math::differentiation;
 
@@ -113,19 +126,19 @@ public:
     auto y = sin(make_fvar<T, Order>(t));
     y *= m_y_radii;
 
-    return vector<T>(x.derivative(1), y.derivative(1), 0);
+    return make_vector<T>(x.derivative(1), y.derivative(1), 0);
   }
 
-  auto get_type() const noexcept -> curve<T>::type
+  curve<T>::type get_type() const noexcept override
   {
     return curve<T>::type::ellipse;
   }
 
-  auto get_x_radii() const noexcept -> T { return m_x_radii; }
+  T get_x_radii() const noexcept { return m_x_radii; }
 
-  auto get_y_radii() const noexcept -> T { return m_y_radii; }
+  T get_y_radii() const noexcept { return m_y_radii; }
 
-  auto get_radii_sum() const noexcept -> T { return m_x_radii + m_y_radii; }
+  T get_radii_sum() const noexcept override { return m_x_radii + m_y_radii; }
 };
 
 template<Number T>
@@ -140,7 +153,7 @@ public:
   {
   }
 
-  auto get_point(T t) const noexcept -> point<T>
+  point<T> get_point(T t) const noexcept override
   {
     // x(t) = a cos(t)
     // y(t) = a sin(t)
@@ -149,7 +162,7 @@ public:
     return point<T>(m_radius * std::cos(t), m_radius * std::sin(t), m_step * t);
   }
 
-  auto get_derivative(T t) const noexcept -> vector<T>
+  vector<T> get_derivative(T t) const noexcept override
   {
     using namespace boost::math::differentiation;
 
@@ -163,17 +176,17 @@ public:
     auto z = make_fvar<T, Order>(t);
     z *= m_step;
 
-    return vector<T>(x.derivative(1), y.derivative(1), z.derivative(1));
+    return make_vector<T>(x.derivative(1), y.derivative(1), z.derivative(1));
   }
 
-  auto get_type() const noexcept -> curve<T>::type
+  curve<T>::type get_type() const noexcept override
   {
     return curve<T>::type::helix;
   }
 
-  auto get_radius() const noexcept -> T { return m_radius; }
+  T get_radius() const noexcept { return m_radius; }
 
-  auto get_step() const noexcept -> T { return m_step; }
+  T get_step() const noexcept { return m_step; }
 
-  auto get_radii_sum() const noexcept -> T { return m_radius; }
+  T get_radii_sum() const noexcept override { return m_radius; }
 };
